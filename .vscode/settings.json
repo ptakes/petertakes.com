@@ -1,0 +1,26 @@
+{
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true,
+  "editor.insertSpaces": true,
+  "files.autoSave": "afterDelay",
+  "files.exclude": {
+    "**/.git": true,
+    "**/bin": true,
+    "**/node_modules": true,
+    "**/obj": true,
+    "**/typings": true,
+    "**/*.js": {
+      "when": "$(basename).ts"
+    },
+    "**/*.js.map": {
+      "when": "$(basename)"
+    }
+  },
+  "files.trimTrailingWhitespace": true,
+  "terminal.integrated.shell.windows": "C:\\Windows\\sysnative\\WindowsPowerShell\\v1.0\\powershell.exe",
+  "terminal.integrated.shellArgs.windows": [
+    "-NoLogo"
+  ],
+  "tslint.enable": true,
+  "typescript.tsdk": "node_modules/typescript/lib"
+}
