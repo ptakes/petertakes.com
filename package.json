@@ -9,6 +9,7 @@
     "clean": "npm run gulp clean",
     "e2e": "cross-env NODE_ENV=test npm run gulp e2e",
     "gulp": "cross-env TS_NODE_PROJECT=tsconfig.tsnode.json TS_NODE_FAST=true gulp",
+    "preinstall": "dotnet restore",
     "postinstall": "typings install",
     "publish": "cross-env NODE_ENV=production npm run gulp publish",
     "serve": "cross-env NODE_ENV=development npm run gulp serve",
