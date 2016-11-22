@@ -15,7 +15,7 @@
     "serve": "cross-env NODE_ENV=development npm run gulp serve",
     "serve:dev": "cross-env NODE_ENV=development npm run gulp serve",
     "serve:prod": "cross-env NODE_ENV=production npm run gulp serve",
-    "start": "serve:dev",
+    "start": "npm run serve:dev",
     "test": "cross-env NODE_ENV=test npm run gulp test",
     "tsc": "tsc",
     "tslint": "tslint",
