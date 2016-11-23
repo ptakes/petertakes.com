@@ -19,6 +19,6 @@ function watchApp() {
 }
 
 gulp.task('watch', gulp.series([
-  'serve:api:watch',
+  'serve:dotnet:watch',
   watchApp
 ]));
