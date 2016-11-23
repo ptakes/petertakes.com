@@ -3,3 +3,5 @@ node_modules/
 obj/
 bin/
 typings/
+npm-debug.log
+project.lock.json
