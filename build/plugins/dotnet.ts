@@ -1,6 +1,7 @@
 import * as Promise from 'bluebird';
+import * as PubSub from 'pubsub-js';
 import * as path from 'path';
-import { Configuration, Environment, serverUrl, configurations }  from '../config';
+import { Configuration, Environment, serverUrl, configurations } from '../config';
 import { ChildProcess, SpawnOptions, spawn } from 'child_process';
 
 const defaultEnvironment = 'development';
@@ -90,6 +91,7 @@ export function serve(options: DotNetOptions = {}): Promise<ChildProcess> {
     childProcess.stdout.on('data', data => {
       process.stdout.write(data);
       if (data.toString().indexOf('Application started') !== -1) {
+        PubSub.publish('dotnet:run:started', childProcess);
         resolve(childProcess);
       }
     });

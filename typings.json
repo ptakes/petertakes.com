@@ -4,9 +4,12 @@
     "bluebird": "registry:npm/bluebird#3.4.1+20160909132857",
     "del": "registry:npm/del#2.2.0+20160416211512",
     "gulp": "registry:npm/gulp#4.0.0-alpha.2+20160817105618",
+    "opn": "registry:npm/opn#4.0.0+20160326092750",
     "yargs": "registry:npm/yargs#5.0.0+20160907000723"
   },
   "globalDependencies": {
-    "node": "registry:dt/node#6.0.0+20161110151007"
+    "browser-sync": "registry:dt/browser-sync#0.0.0+20160928124223",
+    "node": "registry:dt/node#6.0.0+20161110151007",
+    "pubsub": "registry:dt/pubsub#1.5.2+20160317120654"
   }
 }
