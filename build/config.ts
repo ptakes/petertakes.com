@@ -26,6 +26,12 @@ export const cleanPaths = [
   path.join(rootDir, 'npm-debug.log')
 ];
 
+export const globPaths = [
+  path.join(rootDir, 'node_modules/'),
+  path.join(rootDir, 'typings/'),
+  path.join(rootDir, 'project.lock.json')
+];
+
 export const cssPaths = [`${appDir}**/*.css`];
 export const htmlPaths = [`${appDir}**/*.html`];
 export const jsPaths = [`${appDir}**/*.js`];
