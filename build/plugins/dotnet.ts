@@ -1,7 +1,7 @@
 import * as Promise from 'bluebird';
 import * as path from 'path';
 import { Configuration, Environment, serverUrl, configurations }  from '../config';
-import { SpawnOptions, spawn } from 'child_process';
+import { ChildProcess, SpawnOptions, spawn } from 'child_process';
 
 const defaultEnvironment = 'development';
 
@@ -9,9 +9,7 @@ interface Error {
   showStack?: boolean;
 }
 
-function makeError(message: Error): Error;
-function makeError(message: string): Error;
-function makeError(message): Error {
+function makeError(message: string | Error): Error {
   let error: Error;
   if (message instanceof Error) {
     error = message;
@@ -30,14 +28,46 @@ export interface DotNetOptions {
   watch?: boolean;
 }
 
-export function serve(options: DotNetOptions = {}) {
+export function build(options: DotNetOptions = {}): Promise<ChildProcess> {
   options = Object.assign({
     configuration: configurations[process.env.NODE_ENV || defaultEnvironment],
     cwd: path.resolve(),
     environment: process.env.NODE_ENV || defaultEnvironment
   }, options);
 
-  const spawnEnv = Object.create(process.env);
+  const spawnEnv: any = Object.create(process.env);
+  spawnEnv.ASPNETCORE_ENVIRONMENT = options.environment;
+
+  const spawnOptions: SpawnOptions = {
+    cwd: options.cwd,
+    env: spawnEnv,
+    stdio: ['inherit', 'inherit', 'inherit']
+  };
+
+  const childProcess: ChildProcess = spawn('dotnet', ['build', '-c', <string>options.configuration], spawnOptions);
+
+  return new Promise<ChildProcess>((resolve, reject) => {
+    childProcess.once('error', () => reject(makeError('DotNet build failed.')));
+
+    childProcess.once('close', code => {
+      if (code !== 0) {
+        reject(makeError('DotNet build failed.'));
+        return;
+      }
+
+      resolve(childProcess);
+    });
+  });
+}
+
+export function serve(options: DotNetOptions = {}): Promise<ChildProcess> {
+  options = Object.assign({
+    configuration: configurations[process.env.NODE_ENV || defaultEnvironment],
+    cwd: path.resolve(),
+    environment: process.env.NODE_ENV || defaultEnvironment
+  }, options);
+
+  const spawnEnv: any = Object.create(process.env);
   spawnEnv.ASPNETCORE_ENVIRONMENT = options.environment;
   spawnEnv.ASPNETCORE_URLS = serverUrl;
 
@@ -52,9 +82,9 @@ export function serve(options: DotNetOptions = {}) {
     args.unshift('watch');
   }
 
-  const childProcess = spawn('dotnet', args, spawnOptions);
+  const childProcess: ChildProcess = spawn('dotnet', args, spawnOptions);
 
-  return new Promise((resolve, reject) => {
+  return new Promise<ChildProcess>((resolve, reject) => {
     childProcess.once('error', () => reject(makeError('DotNet run failed.')));
 
     childProcess.stdout.on('data', data => {
