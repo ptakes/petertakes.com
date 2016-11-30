@@ -89,8 +89,6 @@ export interface FtpOptions {
   timeOffset?: number;
   useCompression?: boolean;
 
-  maxRetries?: number;
-  retryInterval?: number;
   log?: (message: string) => void;
 };
 
@@ -101,8 +99,9 @@ export class Ftp {
     this.ftp = new PromiseFtp();
   }
 
-  connect(): Promise<string> {
-    return Promise.resolve(this.ftp.connect(this.options));
+  connect(): Promise<Ftp> {
+    return Promise.resolve(this.ftp.connect(this.options))
+      .then(() => this);
   }
 
   delete(file: FtpFile): Promise<FtpFile> {

@@ -66,6 +66,7 @@ export const ftpHost = 'petertakes.com';
 export const ftpUser: string = process.env.FTP_USR || argv['usr'];
 export const ftpPassword: string = process.env.FTP_PWD || argv['pwd'];
 export const ftpRoot = 'petertakes.com/wwwroot';
+export const ftpCleanPaths = ['!logs'];
 
 // Others
 export const browserApp = ['chrome', '--incognito'];

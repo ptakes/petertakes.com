@@ -6,6 +6,7 @@
     "glob-stream": "registry:npm/glob-stream#5.3.1+20160817012007",
     "graceful-fs": "registry:npm/graceful-fs#4.0.0+20160723033700",
     "gulp": "registry:npm/gulp#4.0.0-alpha.2+20160817105618",
+    "minimatch": "registry:npm/minimatch#3.0.0+20160723033700",
     "opn": "registry:npm/opn#4.0.0+20160326092750",
     "through2": "registry:npm/through2#2.0.0+20160817101636",
     "vinyl": "registry:npm/vinyl#1.2.0+20161017220031",

@@ -1,12 +1,16 @@
 import * as File from 'vinyl';
 import * as FS from 'graceful-fs';
+import * as Minimatch from 'minimatch';
 import * as Path from 'path';
 import * as Promise from 'bluebird';
+import { Disposer } from 'bluebird';
 import * as globStream from 'glob-stream';
 import * as through2 from 'through2';
 import { TransformCallback } from 'through2';
 import { Readable } from 'lazystream';
 import { Ftp, FtpFile, FtpOptions, stats } from './ftp';
+
+type Filter = ((path: string) => boolean);
 
 function wrapFtpFile(remoteBase: string): NodeJS.ReadWriteStream {
   return through2.obj((file: any, encoding: string, callback: TransformCallback) => {
@@ -38,10 +42,6 @@ export class FtpDeploy {
 
       timeOffset: 0,
       useCompression: false,
-
-      parallel: 3,
-      maxRetries: 5,
-      retryInterval: 3000
     }, this.options);
   }
 
@@ -57,31 +57,37 @@ export class FtpDeploy {
     return stream;
   }
 
-  clean(): NodeJS.ReadWriteStream {
-    const self = this;
+  clean(glob?: string | string[]): NodeJS.ReadWriteStream {
     const remoteFiles = this.getRemoteFiles();
-    return through2.obj(transform, flush);
+    return through2.obj(transform.bind(this), flush.bind(this));
 
     function flush(callback: () => void): void {
+      const patterns = (glob && glob.constructor === Array)
+        ? <string[]>glob
+        : (glob ? [<string>glob] : []);
+      const filters = patterns.map(patterh => <Filter>Minimatch.filter(patterh));
+
       remoteFiles
+        .filter((remoteFile: FtpFile) =>
+          filters.reduce((isMatch: boolean, filter: Filter) => isMatch && filter(remoteFile.relative), true)
+        )
         .each((remoteFile: FtpFile) => {
           if (remoteFile.remoteStat.isDirectory()) {
             return remoteFile;
           }
 
-          return self.getFtpConnection()
-            .then(ftp => ftp.delete(remoteFile)
-              .finally(() => ftp.end()));
+          return Promise.using(this.getConnection(), (ftp: Ftp) =>
+            ftp.delete(remoteFile)
+          );
         })
         .each((remoteFile: FtpFile) => {
           if (!remoteFile.remoteStat.isDirectory()) {
             return remoteFile;
           }
 
-          return self.getFtpConnection()
-            .then(ftp => ftp.rmdir(remoteFile)
-              .catch(() => remoteFile)
-              .finally(() => ftp.end()));
+          return Promise.using(this.getConnection(), (ftp: Ftp) =>
+            ftp.rmdir(remoteFile).catch(() => remoteFile)
+          );
         })
         .finally(callback);
     }
@@ -96,48 +102,32 @@ export class FtpDeploy {
             file.remoteStat = remoteFile.remoteStat;
             remoteFiles.splice(index, 1);
           }
-          callback(null, file)
+          callback(null, file);
         })
         .catch(error => callback(error, file));
     }
   }
 
   dest(): NodeJS.ReadWriteStream {
-    const self = this;
-    return through2.obj(transform, flush);
-
-    function flush(callback: () => void): void {
-      callback();
-    }
-
-    function transform(file: FtpFile, encoding: string, callback: TransformCallback): void {
-      self.getFtpConnection()
-        .then((ftp: Ftp) => self.upload(ftp, file))
-        .then(() => callback(null, file))
-        .catch((error: Error) => callback(error, file));
-    }
+    return through2.obj((file: FtpFile, encoding: string, callback: TransformCallback) =>
+      Promise.using(this.getConnection(), (ftp: Ftp) =>
+        ftp.mkdir(file)
+          .then(() => ftp.put(file))
+          .then(() => callback(null, file))
+          .catch((error: Error) => callback(error, file))
+      )
+    );
   }
 
-  private getFtpConnection(retries = { count: 0 }): Promise<Ftp> {
-    // TODO: throttle parallel connections
-    const ftp = new Ftp(this.remoteBase, this.localBase, this.options);
-    return ftp.connect()
-      .then(() => ftp)
-      .catch(error => {
-        if (retries.count < this.options.maxRetries) {
-          this.log('Retrying to connect to server...');
-          retries.count++;
-
-          return Promise.delay(<number>this.options.retryInterval)
-            .then(() => this.getFtpConnection(retries));
-        }
-        return Promise.reject(error);
-      });
+  private getConnection(): Disposer<Ftp> {
+    return new Ftp(this.remoteBase, this.localBase, this.options)
+      .connect()
+      .disposer(ftp => ftp.end());
   }
 
   private getRemoteFiles(remoteFolder?: string): Promise<FtpFile[]> {
-    return this.getFtpConnection()
-      .then(ftp => ftp.list(remoteFolder)
+    return Promise.using(this.getConnection(), (ftp: Ftp) =>
+      ftp.list(remoteFolder)
         .map((remoteFile: FtpFile) => {
           if (remoteFile.remoteStat.isDirectory()) {
             return this.getRemoteFiles(remoteFile.relative)
@@ -145,32 +135,7 @@ export class FtpDeploy {
           }
           return [remoteFile];
         })
-        .then(remoteFiles => ftp.end()
-          .then(() => [].concat.apply([], remoteFiles))
-        )
-      );
-  }
-
-  private log(message: string): void {
-    if (this.options.log) {
-      this.options.log(message);
-    }
-  }
-
-  private upload(ftp: Ftp, file: FtpFile, retries = { count: 0 }): Promise<FtpFile> {
-    return ftp.mkdir(file)
-      .then(() => ftp.put(file))
-      .then(() => ftp.end())
-      .then(() => file)
-      .catch(error => {
-        if (retries.count < this.options.maxRetries) {
-          this.log('Retrying to upload...');
-          retries.count++;
-
-          return Promise.delay(<number>this.options.retryInterval)
-            .then(() => this.upload(ftp, file, retries));
-        }
-        return Promise.reject(error);
-      });
+        .then(remoteFiles => [].concat.apply([], remoteFiles))
+    );
   }
 }

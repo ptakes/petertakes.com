@@ -2,7 +2,7 @@ import * as gulp from 'gulp';
 import { FtpDeploy } from '../plugins/ftp-deploy';
 import { publish as publishDotNet } from '../plugins/dotnet';
 import { logger } from '../plugins/logger';
-import { ftpHost, ftpPassword, ftpRoot, ftpUser, publishDir } from '../config';
+import { ftpCleanPaths, ftpHost, ftpPassword, ftpRoot, ftpUser, publishDir } from '../config';
 
 function ftpDeploy(): NodeJS.ReadWriteStream {
   const ftp = new FtpDeploy(ftpRoot, publishDir, {
@@ -13,7 +13,7 @@ function ftpDeploy(): NodeJS.ReadWriteStream {
   });
 
   return ftp.src()
-    .pipe(ftp.clean())
+    .pipe(ftp.clean(ftpCleanPaths))
     .pipe(ftp.dest());
 }
 
