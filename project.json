@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "Microsoft.NETCore.App": {
-      "version": "1.1.0",
+      "version": "1.1.0-*",
       "type": "platform"
     },
     "Microsoft.AspNetCore.Diagnostics": "1.1.0",
@@ -14,11 +14,17 @@
     "Microsoft.Extensions.Logging.Console": "1.1.0"
   },
   "tools": {
-     "Microsoft.AspNetCore.Server.IISIntegration.Tools": "1.1.0-*",
-     "Microsoft.DotNet.Watcher.Tools": "1.1.0-*"
+    "Microsoft.AspNetCore.Server.IISIntegration.Tools": "1.1.0-*",
+    "Microsoft.DotNet.Watcher.Tools": "1.1.0-*"
   },
   "frameworks": {
-    "netcoreapp1.1": {}
+    "netcoreapp1.1": {
+      "imports": [
+        "dotnet5.6",
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
+    }
   },
   "runtimes": {
     "win81-x64": {},
@@ -44,7 +50,9 @@
     ]
   },
   "scripts": {
-    "postpublish": [ "dotnet publish-iis --publish-folder %publish:OutputPath% --framework %publish:FullTargetFramework%" ]
+    "postpublish": [
+      "dotnet publish-iis --publish-folder %publish:OutputPath% --framework %publish:FullTargetFramework%"
+    ]
   },
   "tooling": {
     "defaultNamespace": "Pta"

@@ -15,6 +15,7 @@ declare module 'eazy-logger' {
 
   export class Logger  {
     constructor(config?: LoggerConfig);
+    
     canLog (level: LogLevel): boolean;
     clone(options: LoggerConfig | ((config: LoggerConfig) => LoggerConfig)): Logger;
     log(level: LogLevel, message: string, ...args: Array<any>): Logger;

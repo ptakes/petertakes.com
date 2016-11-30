@@ -1,5 +1,5 @@
-import { argv } from 'yargs';
 import * as path from 'path';
+import { argv } from 'yargs';
 
 // Environment & Configurations
 export type Configuration = 'debug' | 'release';
@@ -50,6 +50,12 @@ export const baseUrl = '/';
 export const proxyPort = 3000;
 export const proxyUIPort = 3001;
 export const serverUrl = 'http://localhost:5000';
+
+// Deploy
+export const ftpHost = 'petertakes.com';
+export const ftpUser: string = process.env.FTP_USR || argv['usr'];
+export const ftpPassword: string = process.env.FTP_PWD || argv['pwd'];
+export const ftpRoot = 'petertakes.com/wwwroot';
 
 // Others
 export const browserApp = ['chrome', '--incognito'];

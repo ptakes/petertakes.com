@@ -83,14 +83,13 @@ function spawnDotNet(task: DotNetTask, options: DotNetOptions, args?: Array<stri
         return;
       }
 
-      if (!stdout && !detach) {
+      if (!stdout) {
         resolve(childProcess);
       }
     });
 
     if (detach) {
       childProcess.unref();
-      resolve(childProcess);
     }
   });
 }
@@ -102,7 +101,7 @@ export function build(options: DotNetOptions = {}): Promise<ChildProcess> {
 
 export function publish(options: DotNetOptions = {}): Promise<ChildProcess> {
   options = getOptions(options, defaultPublishEnvironment);
-  return spawnDotNet('publish', options, ['-o', distDir, '-r', <string>options.runtime]);
+  return spawnDotNet('publish', options, ['-o', distDir, '-r', <string>options.runtime, '--no-build']);
 }
 
 export function serve(options: DotNetOptions = {}): Promise<ChildProcess> {
