@@ -2,10 +2,10 @@ import * as gulp from 'gulp';
 import { FtpDeploy } from '../plugins/ftp-deploy';
 import { publish as publishDotNet } from '../plugins/dotnet';
 import { logger } from '../plugins/logger';
-import { distDir, ftpHost, ftpPassword, ftpRoot, ftpUser } from '../config';
+import { ftpHost, ftpPassword, ftpRoot, ftpUser, publishDir } from '../config';
 
 function ftpDeploy(): NodeJS.ReadWriteStream {
-  const ftp = new FtpDeploy(ftpRoot, distDir, {
+  const ftp = new FtpDeploy(ftpRoot, publishDir, {
     host: ftpHost,
     user: ftpUser,
     password: ftpPassword,
@@ -20,7 +20,7 @@ function ftpDeploy(): NodeJS.ReadWriteStream {
 gulp.task('publish:dotnet', publishDotNet);
 
 gulp.task('publish', gulp.series([
-  'clean',
+  'clean:publish',
   'build',
   'publish:dotnet'
 ]));

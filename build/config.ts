@@ -1,24 +1,34 @@
 import * as path from 'path';
 import { argv } from 'yargs';
 
-// Environment & Configurations
-export type Configuration = 'debug' | 'release';
+// Environments & Configurations
 export type Environment = 'development' | 'test' | 'production';
-export type Runtime = 'win81-x64' | 'win10-x64';
 
 export const ENV: Environment = (argv['env'] || process.env.NODE_ENV || 'development').toLowerCase();
 process.env.NODE_ENV = ENV;
 
-export const configurations: { [environment: string]: Configuration } = {
-  development: 'debug',
-  test: 'debug',
-  production: 'release',
-};
+export interface DotNetEnvironment {
+  configuration: 'debug' | 'release';
+  framework: 'net452' | 'netcoreapp1.1';
+  runtime: 'win81-x64' | 'win10-x64';
+}
 
-export const runtimes: { [environment: string]: Runtime } = {
-  development: 'win10-x64',
-  test: 'win10-x64',
-  production: 'win81-x64',
+export const dotnetEnvironments: { [environment: string]: DotNetEnvironment } = {
+  development: {
+    configuration: 'debug',
+    framework: 'netcoreapp1.1',
+    runtime: 'win10-x64'
+  },
+  test: {
+    configuration: 'debug',
+    framework: 'netcoreapp1.1',
+    runtime: 'win10-x64'
+  },
+  production: {
+    configuration: 'release',
+    framework: 'net452',
+    runtime: 'win81-x64'
+  }
 };
 
 // Paths
@@ -26,11 +36,11 @@ export const appDir = path.resolve('wwwroot');
 export const rootDir = path.resolve();
 export const tasksDir = path.resolve('build/tasks');
 
-export const distDir = path.join(rootDir, 'dist/');
+export const publishDir = path.join(rootDir, 'dist/');
 
 export const cleanPaths = [
   path.join(rootDir, 'bin/'),
-  distDir,
+  publishDir,
   path.join(rootDir, 'obj/'),
   path.join(rootDir, 'npm-debug.log')
 ];

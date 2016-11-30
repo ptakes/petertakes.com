@@ -1,7 +1,7 @@
 import * as Promise from 'bluebird';
 import * as PubSub from 'pubsub-js';
 import * as path from 'path';
-import { Configuration, Environment, Runtime, configurations, distDir, runtimes, serverUrl } from '../config';
+import { DotNetEnvironment, Environment, dotnetEnvironments, publishDir, serverUrl } from '../config';
 import { ChildProcess, SpawnOptions, spawn } from 'child_process';
 
 const defaultBuildEnvironment: Environment = 'development';
@@ -10,10 +10,9 @@ const defaultPublishEnvironment: Environment = 'production';
 type DotNetTask = 'build' | 'publish' | 'run';
 
 export interface DotNetOptions {
-  configuration?: Configuration;
   cwd?: string;
+  dotNetEnvironment?: DotNetEnvironment;
   environment?: Environment;
-  runtime?: Runtime;
   watch?: boolean;
 }
 
@@ -26,11 +25,13 @@ interface StdioListener {
 }
 
 function getOptions(options: DotNetOptions, defaultEnvironment: Environment): DotNetOptions {
+  const environment = process.env.NODE_ENV || defaultEnvironment;
+  const dotNetEnvironment = dotnetEnvironments[environment];
+
   return Object.assign({
-    configuration: configurations[process.env.NODE_ENV || defaultEnvironment],
     cwd: path.resolve(),
-    environment: process.env.NODE_ENV || defaultEnvironment,
-    runtime: runtimes[process.env.NODE_ENV || defaultEnvironment]
+    dotNetEnvironment,
+    environment
   }, options);
 }
 
@@ -58,7 +59,12 @@ function spawnDotNet(task: DotNetTask, options: DotNetOptions, args?: Array<stri
     stdio: ['inherit', (stdout ? 'pipe' : 'inherit'), 'inherit']
   };
 
-  const spawnArgs: Array<string> = [task, '-c', <string>options.configuration].concat(args || []);
+  const environment = <DotNetEnvironment>options.dotNetEnvironment;
+  const spawnArgs: Array<string> = [task, '-c', environment.configuration, '-f', environment.framework].concat(args || []);
+  if (task === 'build' || task === 'publish') {
+    spawnArgs.push('-r');
+    spawnArgs.push(environment.runtime);
+  }
   if (options.watch) {
     spawnArgs.unshift('watch');
   }
@@ -101,7 +107,7 @@ export function build(options: DotNetOptions = {}): Promise<ChildProcess> {
 
 export function publish(options: DotNetOptions = {}): Promise<ChildProcess> {
   options = getOptions(options, defaultPublishEnvironment);
-  return spawnDotNet('publish', options, ['-o', distDir, '-r', <string>options.runtime, '--no-build']);
+  return spawnDotNet('publish', options, ['-o', publishDir, '--no-build']);
 }
 
 export function serve(options: DotNetOptions = {}): Promise<ChildProcess> {
