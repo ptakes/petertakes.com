@@ -1,4 +1,3 @@
-import * as Promise from 'bluebird';
 import * as PubSub from 'pubsub-js';
 import * as path from 'path';
 import { DotNetEnvironment, Environment, dotnetEnvironments, publishDir, serverUrl } from '../config';

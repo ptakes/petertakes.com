@@ -2,7 +2,7 @@ import * as PubSub from 'pubsub-js';
 import * as gulp from 'gulp';
 import { cssPaths, htmlPaths, jsPaths } from '../config';
 import { logger } from '../plugins/logger';
-import { reloadBrowser } from '../plugins/browser-sync';
+import { reloadBrowser } from '../plugins/browser-link';
 
 let started = false;
 PubSub.subscribe('dotnet:run:started', () => started && reloadBrowser());

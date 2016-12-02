@@ -27,7 +27,7 @@ declare module 'promise-ftp' {
     }
 
     export interface ListEntry {
-      type: '' | 'd' | '-';
+      type: 'l' | 'd' | '-';
       name: string;
       size: string;
       date: Date;

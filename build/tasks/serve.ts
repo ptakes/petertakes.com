@@ -1,5 +1,5 @@
 import * as gulp from 'gulp';
-import { openBrowser } from '../plugins/browser-sync';
+import { openBrowser } from '../plugins/browser-link';
 import { serve as serveDotNet } from '../plugins/dotnet';
 
 gulp.task('serve:dotnet', () => serveDotNet().then(openBrowser));

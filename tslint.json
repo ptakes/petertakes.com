@@ -19,11 +19,7 @@
       160
     ],
     "member-access": false,
-    "member-ordering": [
-      true,
-      "static-before-instance",
-      "variables-before-functions"
-    ],
+    "member-ordering": [false],
     "no-arg": true,
     "no-bitwise": true,
     "no-console": [
@@ -40,7 +36,9 @@
     "no-duplicate-variable": true,
     "no-empty": false,
     "no-eval": true,
-    "no-inferrable-types": [true],
+    "no-inferrable-types": [
+      true
+    ],
     "no-shadowed-variable": false,
     "no-string-literal": false,
     "no-switch-case-fall-through": true,
