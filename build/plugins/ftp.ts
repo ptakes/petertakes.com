@@ -1,4 +1,3 @@
-import { async, await } from 'asyncawait';
 import * as FS from 'graceful-fs';
 import * as Path from 'path';
 import * as PromiseFtp from 'promise-ftp';
@@ -21,6 +20,9 @@ export interface FtpOptions {
 
   timeOffset?: number;
   useCompression?: boolean;
+
+  maxRetries?: number;
+  retryDelay?: number;
 
   log?: (message: string) => void;
 };
@@ -48,58 +50,57 @@ export class Ftp {
     this.ftp = new PromiseFtp();
   }
 
-  connect = async(() => {
-    await(this.ftp.connect(this.options));
+  async connect(): Promise<Ftp> {
+    await this.ftp.connect(this.options);
     return this;
-  });
+  }
 
-  delete = async((file: RemoteFile) => {
+  async delete(file: RemoteFile): Promise<RemoteFile> {
     if (!file.remoteStat || !file.remoteStat.isFile()) {
       return file;
     }
 
     this.log(`DEL ${file.relative}`);
-    await(this.ftp.delete(getRemotePath(file)));
+    await this.ftp.delete(getRemotePath(file));
     return file;
-  });
+  }
 
-  end = async(() => await(this.ftp.end()));
+  async end(): Promise<boolean | Error> {
+    return await this.ftp.end();
+  }
 
-  list = <(folder?: string) => Promise<RemoteFile[]>>async((folder = '.') => {
+  async list(folder = '.'): Promise<RemoteFile[]> {
     this.log(`LIST ${folder}`);
-    const files = await(this.ftp.list(Path.join(this.remoteBase, folder)));
-    return files.map(file => {
-      const path = Path.join(this.localBase, folder, file.name);
+    const entries = await (this.ftp.list(Path.join(this.remoteBase, folder)));
+
+    const files = await Promise.all(entries.map(async entry => {
+      const path = Path.join(this.localBase, folder, entry.name);
 
       return <RemoteFile>new File(<any>{
         base: this.localBase,
         path: path,
-        stat: await(getFileStats(path)) || null,
+        stat: (await getFileStats(path)) || null,
         remoteBase: this.remoteBase,
-        remoteStat: new RemoteStat(file, <number>this.options.timeOffset)
+        remoteStat: new RemoteStat(entry, <number>this.options.timeOffset)
       });
-    });
-  });
+    }));
 
-  log(message: string): void {
-    if (this.options.log) {
-      this.options.log(message);
-    }
+    return files;
   }
 
-  mkdir = async((file: RemoteFile, recursive = true) => {
+  async mkdir(file: RemoteFile, recursive = true): Promise<RemoteFile> {
     const relative = file.isDirectory() ? file.relative : Path.dirname(file.relative);
     if (relative !== '/' && relative !== '.' && relative !== '..') {
       if (file.isDirectory()) {
         this.log(`MKDIR ${relative}`);
       }
-      await(this.ftp.mkdir(getRemotePath(file, relative), recursive));
+      await this.ftp.mkdir(getRemotePath(file, relative), recursive);
     }
 
     return file;
-  });
+  };
 
-  put = async((file: RemoteFile) => {
+  async put(file: RemoteFile): Promise<RemoteFile> {
     if (file.isDirectory() || file.isNull()) {
       return file;
     }
@@ -113,19 +114,25 @@ export class Ftp {
     }
 
     this.log(`PUT ${file.relative}`);
-    await(this.ftp.put(stream, getRemotePath(file), this.options.useCompression));
+    await this.ftp.put(stream, getRemotePath(file), this.options.useCompression);
     return file;
-  });
+  }
 
-  rmdir = async((file: RemoteFile, recursive = true) => {
+  async rmdir(file: RemoteFile, recursive = true): Promise<RemoteFile> {
     if (!file.remoteStat || !file.remoteStat.isDirectory()) {
       return file;
     }
 
     this.log(`RMDIR ${file.relative}`);
-    await(this.ftp.rmdir(getRemotePath(file), recursive));
+    await this.ftp.rmdir(getRemotePath(file), recursive);
     return file;
-  });
+  }
+
+  private log(message: string): void {
+    if (this.options.log) {
+      this.options.log(message);
+    }
+  }
 }
 
 class RemoteStat implements FS.Stats {

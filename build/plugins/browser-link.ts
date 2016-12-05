@@ -1,4 +1,3 @@
-import { async, await } from 'asyncawait';
 import { BrowserSyncInstance as BrowserSync, Options as BrowserSyncOptions, create as createBrowserSync } from 'browser-sync';
 import * as open from 'opn';
 import { browserApp, proxyPort, proxyUIPort, serverUrl } from '../config';
@@ -25,8 +24,8 @@ function reportUrls(serverUrl: string, browserSync: BrowserSync): void {
   logger.info(`[BrowserSync]       UI: {cyan:${uiUrl}}`);
 }
 
-export const openBrowser = async(() => {
-  const browserSync = await(initBrowserSync({
+export async function openBrowser() {
+  const browserSync = await initBrowserSync({
     logLevel: 'silent',
     online: false,
     open: false,
@@ -39,15 +38,15 @@ export const openBrowser = async(() => {
       response.setHeader('Access-Control-Allow-Origin', '*');
       next();
     }
-  }));
+  });
 
   reportUrls(serverUrl, browserSync);
   open(browserSync.options.getIn(['urls', 'local']), { app: browserApp, wait: false });
 
   return browserSync;
-});
+};
 
-export const reloadBrowser = () => {
+export function reloadBrowser() {
   browserSyncInstance.reload();
   return Promise.resolve(browserSyncInstance);
 };
