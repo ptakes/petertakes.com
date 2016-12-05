@@ -4,9 +4,12 @@ import { Readable } from 'lazystream';
 import * as Minimatch from 'minimatch';
 import * as Path from 'path';
 import * as through2 from 'through2';
-import { TransformCallback } from 'through2';
 import * as File from 'vinyl';
 import { Ftp, FtpOptions, RemoteFile, getFileStats } from './ftp';
+
+type TransformCallback = (error?: any, data?: any) => void;
+type TransformFunction = (chunk: any, enc: string, callback: TransformCallback) => void;
+type FlushCallback = () => void;
 
 type Filter = ((path: string) => boolean);
 
@@ -75,7 +78,7 @@ export class FtpDeploy {
 
         const index = remoteFiles.findIndex(remoteFile => remoteFile.relative === file.relative);
         if (index !== -1) {
-          const {remoteBase, remoteStat } = remoteFiles[index];
+          const { remoteBase, remoteStat } = remoteFiles[index];
           file.remoteBase = remoteBase;
           file.remoteStat = remoteStat;
           remoteFiles.splice(index, 1);
@@ -83,7 +86,7 @@ export class FtpDeploy {
 
         done(null, file);
       },
-      async (done: () => void) => {
+      async (done: FlushCallback) => {
         const filters = glob.map((item: string) => <Filter>Minimatch.filter(item));
         const files = remoteFiles.filter(file => filters.reduce((isMatch: boolean, filter: Filter) => isMatch && filter(file.relative), true));
 
@@ -112,15 +115,15 @@ export class FtpDeploy {
         files.push(file);
         done(null, file);
       },
-      async (done: () => void) => {
+      async (done: FlushCallback) => {
         try {
           const ftp = new Ftp(this.remoteBase, this.localBase, this.options);
           await ftp.call(async ftp => {
-            for (let directory of files.filter(file => file.stat.isDirectory())) {
+            for (let directory of files.filter(file => (<FS.Stats>file.stat).isDirectory())) {
               await ftp.mkdir(directory);
             }
 
-            for (let file of files.filter(file => file.stat.isFile())) {
+            for (let file of files.filter(file => (<FS.Stats>file.stat).isFile())) {
               await ftp.put(file);
             }
 

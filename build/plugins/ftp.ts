@@ -86,7 +86,7 @@ export class Ftp {
     const files = await Promise.all(entries.map(async entry => {
       const path = Path.join(this.localBase, folder, entry.name);
 
-      return <RemoteFile>new File(<any>{
+      return <RemoteFile>new File({
         base: this.localBase,
         path: path,
         stat: (await getFileStats(path)) || null,

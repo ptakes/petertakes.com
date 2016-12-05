@@ -1,6 +1,7 @@
+import * as Path from 'path';
 import * as PubSub from 'pubsub-js';
 import * as gulp from 'gulp';
-import { cssPaths, htmlPaths, jsPaths } from '../config';
+import { webDir } from '../config';
 import { logger } from '../plugins/logger';
 import { reloadBrowser } from '../plugins/browser-link';
 
@@ -12,13 +13,12 @@ function reportChange(file: string): void {
 }
 
 function watchApp() {
-  gulp.watch(cssPaths, reloadBrowser).on('change', reportChange);
-  gulp.watch(htmlPaths, reloadBrowser).on('change', reportChange);
-  gulp.watch(jsPaths, reloadBrowser).on('change', reportChange);
+  gulp.watch(Path.join(webDir, '**/*'), reloadBrowser).on('change', reportChange);
   started = true;
 }
 
 gulp.task('watch', gulp.series([
+  'build:webpack:watch',
   'serve:dotnet:watch',
   watchApp
 ]));

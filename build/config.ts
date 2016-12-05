@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as Path from 'path';
 import { argv } from 'yargs';
 
 // Environments & Configurations
@@ -32,28 +32,25 @@ export const dotnetEnvironments: { [environment: string]: DotNetEnvironment } = 
 };
 
 // Paths
-export const appDir = path.resolve('wwwroot');
-export const rootDir = path.resolve();
-export const tasksDir = path.resolve('build/tasks');
+export const rootDir = Path.resolve();
+export const sourceDir = Path.resolve('src');
+export const tasksDir = Path.resolve('build/tasks');
+export const webDir = Path.resolve('wwwroot');
 
-export const publishDir = path.join(rootDir, 'dist/');
+export const publishDir = Path.join(rootDir, 'dist/');
 
 export const cleanPaths = [
-  path.join(rootDir, 'bin/'),
+  Path.join(rootDir, 'bin/'),
   publishDir,
-  path.join(rootDir, 'obj/'),
-  path.join(rootDir, 'npm-debug.log')
+  Path.join(rootDir, 'obj/'),
+  Path.join(rootDir, 'npm-debug.log')
 ];
 
 export const globPaths = [
-  path.join(rootDir, 'node_modules/'),
-  path.join(rootDir, 'typings/'),
-  path.join(rootDir, 'project.lock.json')
+  Path.join(rootDir, 'node_modules/'),
+  Path.join(rootDir, 'project.lock.json'),
+  Path.join(rootDir, 'wwwroot/')
 ];
-
-export const cssPaths = [`${appDir}**/*.css`];
-export const htmlPaths = [`${appDir}**/*.html`];
-export const jsPaths = [`${appDir}**/*.js`];
 
 // URLs
 export const baseUrl = '/';
@@ -69,4 +66,5 @@ export const ftpRoot = 'petertakes.com/wwwroot';
 export const ftpCleanPaths = ['!logs'];
 
 // Others
+export const appName = 'Peter Takes';
 export const browserApp = ['chrome', '--incognito'];

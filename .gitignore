@@ -3,5 +3,6 @@ node_modules/
 obj/
 bin/
 typings/
+wwwroot/
 npm-debug.log
 project.lock.json
