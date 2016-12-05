@@ -44,9 +44,11 @@ export class FtpDeploy {
     }, this.options);
   }
 
-  src(globs?: string | string[]): NodeJS.ReadWriteStream {
+  src(globs: string | string[] = Path.join(this.localBase, '**/*')): NodeJS.ReadWriteStream {
+    const glob = (globs instanceof Array) ? globs : [globs];
+
     const stream = globStream
-      .create(this.glob(globs || Path.join(this.localBase, '**/*')), { base: this.localBase })
+      .create(glob, { base: this.localBase })
       .pipe(wrapRemoteFile(this.remoteBase));
 
     stream.on('error', stream.emit.bind(stream, 'error'));
@@ -54,13 +56,16 @@ export class FtpDeploy {
     return stream;
   }
 
-  clean(globs?: string | string[]): NodeJS.ReadWriteStream {
+  clean(globs: string | string[] = []): NodeJS.ReadWriteStream {
+    const glob = (globs instanceof Array) ? globs : [globs];
+
     let remoteFiles: RemoteFile[];
     return through2.obj(
       async (file: RemoteFile, encoding: string, done: TransformCallback) => {
         if (!remoteFiles) {
           try {
-            await this.call(async ftp => remoteFiles = await this.getRemoteFiles(ftp));
+            const ftp = new Ftp(this.remoteBase, this.localBase, this.options);
+            remoteFiles = await ftp.call(async ftp => await ftp.list());
           }
           catch (error) {
             done(error, file);
@@ -79,16 +84,19 @@ export class FtpDeploy {
         done(null, file);
       },
       async (done: () => void) => {
-
-        const filters = this.glob(globs).map((glob: string) => <Filter>Minimatch.filter(glob));
+        const filters = glob.map((item: string) => <Filter>Minimatch.filter(item));
         const files = remoteFiles.filter(file => filters.reduce((isMatch: boolean, filter: Filter) => isMatch && filter(file.relative), true));
 
-        const filesToDelete = files.filter(file => file.remoteStat.isFile());
-        const directoriesToDelete = files.filter(file => file.remoteStat.isDirectory());
+        const ftp = new Ftp(this.remoteBase, this.localBase, this.options);
+        await ftp.call(async ftp => {
+          for (let file of files.filter(file => file.remoteStat.isFile())) {
+            await ftp.delete(file)
+          }
 
-        await this.call(ftp => {
-          filesToDelete.forEach(file => ftp.delete(file));
-          directoriesToDelete.forEach(directory => ftp.rmdir(directory));
+          for (let directory of files.filter(file => file.remoteStat.isDirectory())) {
+            await ftp.rmdir(directory)
+          }
+
           return Promise.resolve();
         });
 
@@ -97,94 +105,31 @@ export class FtpDeploy {
   }
 
   dest(): NodeJS.ReadWriteStream {
-    return through2.obj(async (file: RemoteFile, encoding: string, done: TransformCallback) => {
-      try {
-        await this.call(ftp => {
-          ftp.mkdir(file);
-          ftp.put(file);
-          return Promise.resolve();
-        });
+    let files: RemoteFile[] = [];
+
+    return through2.obj(
+      (file: RemoteFile, encoding: string, done: TransformCallback) => {
+        files.push(file);
         done(null, file);
-      }
-      catch (error) {
-        done(error, file);
-      }
-    });
-  }
+      },
+      async (done: () => void) => {
+        try {
+          const ftp = new Ftp(this.remoteBase, this.localBase, this.options);
+          await ftp.call(async ftp => {
+            for (let directory of files.filter(file => file.stat.isDirectory())) {
+              await ftp.mkdir(directory);
+            }
 
-  private async call<T>(fn: (ftp: Ftp) => Promise<T>): Promise<T> {
-    const ftp = new Ftp(this.remoteBase, this.localBase, this.options);
-    try {
-      await this.tryConnect(ftp);
-      return await this.tryCall(ftp, fn);
-    }
-    finally {
-      await ftp.end();
-    }
-  };
+            for (let file of files.filter(file => file.stat.isFile())) {
+              await ftp.put(file);
+            }
 
-  private glob(glob: string | string[] = []): string[] {
-    return (glob instanceof Array) ? glob : [glob];
-  }
-
-  private async getRemoteFiles(ftp: Ftp, remoteFolder?: string): Promise<RemoteFile[]> {
-    let files = await ftp.list(remoteFolder);
-
-    const allFiles = await Promise.all(files.map(async file => {
-      let descendantFiles: RemoteFile[] = [];
-      if (file.remoteStat.isDirectory()) {
-        descendantFiles = await this.getRemoteFiles(ftp, file.relative);
-      }
-      return [file, ...descendantFiles];
-    }));
-
-    return [].concat.apply([], allFiles);
-  };
-
-  private log(message: string): void {
-    if (this.options.log) {
-      this.options.log(message);
-    }
-  }
-
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve, reject) => setTimeout(resolve, ms));
-  }
-
-  private async tryCall<T>(ftp: Ftp, fn: (ftp: Ftp) => Promise<T>): Promise<T> {
-    let lastError: Error | null = null;
-    let retries = 0;
-    while (retries <= <number>this.options.maxRetries) {
-      try {
-        return await fn(ftp);
-      }
-      catch (error) {
-        lastError = error;
-        retries++;
-        this.log('Retrying...');
-        await this.sleep(<number>this.options.retryDelay)
-      }
-    }
-
-    throw lastError;
-  }
-
-  private async tryConnect(ftp: Ftp): Promise<void> {
-    let lastError: Error | null = null;
-    let retries = 0;
-    while (retries <= <number>this.options.maxRetries) {
-      try {
-        await ftp.connect();
-        return;
-      }
-      catch (error) {
-        lastError = error;
-        retries++;
-        this.log('Retrying to connect...');
-        await this.sleep(<number>this.options.retryDelay)
-      }
-    }
-
-    throw lastError;
+            return Promise.resolve();
+          });
+        }
+        finally {
+          done();
+        }
+      });
   }
 }

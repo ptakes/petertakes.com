@@ -50,6 +50,16 @@ export class Ftp {
     this.ftp = new PromiseFtp();
   }
 
+  async call<T>(fn: (ftp: Ftp) => Promise<T>): Promise<T> {
+    try {
+      await this.tryConnect();
+      return await this.tryCall(fn);
+    }
+    finally {
+      await this.end();
+    }
+  };
+
   async connect(): Promise<Ftp> {
     await this.ftp.connect(this.options);
     return this;
@@ -69,7 +79,7 @@ export class Ftp {
     return await this.ftp.end();
   }
 
-  async list(folder = '.'): Promise<RemoteFile[]> {
+  async list(folder = '.', recursive = true): Promise<RemoteFile[]> {
     this.log(`LIST ${folder}`);
     const entries = await (this.ftp.list(Path.join(this.remoteBase, folder)));
 
@@ -85,7 +95,18 @@ export class Ftp {
       });
     }));
 
-    return files;
+    let allFiles: RemoteFile[][] = [];
+    if (recursive) {
+      allFiles = await Promise.all(files.map(async file => {
+        let descendantFiles: RemoteFile[] = [];
+        if (file.remoteStat.isDirectory()) {
+          descendantFiles = await this.list(file.relative, recursive);
+        }
+        return [file, ...descendantFiles];
+      }));
+    }
+
+    return [].concat.apply([], allFiles);
   }
 
   async mkdir(file: RemoteFile, recursive = true): Promise<RemoteFile> {
@@ -132,6 +153,47 @@ export class Ftp {
     if (this.options.log) {
       this.options.log(message);
     }
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve, reject) => setTimeout(resolve, ms));
+  }
+
+  private async tryCall<T>(fn: (ftp: Ftp) => Promise<T>): Promise<T> {
+    let lastError: Error | null = null;
+    let retries = 0;
+    while (retries <= <number>this.options.maxRetries) {
+      try {
+        return await fn(this);
+      }
+      catch (error) {
+        lastError = error;
+        retries++;
+        this.log('Retrying...');
+        await this.sleep(<number>this.options.retryDelay)
+      }
+    }
+
+    throw lastError;
+  }
+
+  private async tryConnect(): Promise<void> {
+    let lastError: Error | null = null;
+    let retries = 0;
+    while (retries <= <number>this.options.maxRetries) {
+      try {
+        await this.connect();
+        return;
+      }
+      catch (error) {
+        lastError = error;
+        retries++;
+        this.log('Retrying to connect...');
+        await this.sleep(<number>this.options.retryDelay)
+      }
+    }
+
+    throw lastError;
   }
 }
 
