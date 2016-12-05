@@ -60,7 +60,7 @@ export class FtpDeploy {
       async (file: RemoteFile, encoding: string, done: TransformCallback) => {
         if (!remoteFiles) {
           try {
-            remoteFiles = await this.getRemoteFiles();
+            await this.call(async ftp => remoteFiles = await this.getRemoteFiles(ftp));
           }
           catch (error) {
             done(error, file);
@@ -78,16 +78,19 @@ export class FtpDeploy {
 
         done(null, file);
       },
-      (done: () => void) => {
+      async (done: () => void) => {
 
         const filters = this.glob(globs).map((glob: string) => <Filter>Minimatch.filter(glob));
         const files = remoteFiles.filter(file => filters.reduce((isMatch: boolean, filter: Filter) => isMatch && filter(file.relative), true));
 
         const filesToDelete = files.filter(file => file.remoteStat.isFile());
-        filesToDelete.forEach(async file => await this.call(ftp => ftp.delete(file)));
-
         const directoriesToDelete = files.filter(file => file.remoteStat.isDirectory());
-        directoriesToDelete.forEach(async directory => await this.call(ftp => ftp.rmdir(directory)));
+
+        await this.call(ftp => {
+          filesToDelete.forEach(file => ftp.delete(file));
+          directoriesToDelete.forEach(directory => ftp.rmdir(directory));
+          return Promise.resolve();
+        });
 
         done();
       });
@@ -96,8 +99,11 @@ export class FtpDeploy {
   dest(): NodeJS.ReadWriteStream {
     return through2.obj(async (file: RemoteFile, encoding: string, done: TransformCallback) => {
       try {
-        await this.call(ftp => ftp.mkdir(file));
-        await this.call(ftp => ftp.put(file));
+        await this.call(ftp => {
+          ftp.mkdir(file);
+          ftp.put(file);
+          return Promise.resolve();
+        });
         done(null, file);
       }
       catch (error) {
@@ -109,23 +115,8 @@ export class FtpDeploy {
   private async call<T>(fn: (ftp: Ftp) => Promise<T>): Promise<T> {
     const ftp = new Ftp(this.remoteBase, this.localBase, this.options);
     try {
-      await ftp.connect();
-
-      let lastError: Error = new Error();
-      let retries = 0;
-      while (retries <= <number>this.options.maxRetries) {
-        try {
-          return await fn(ftp);
-        }
-        catch (error) {
-          lastError = error;
-          retries++;
-          this.log('{yellow:Retrying...}');
-          await this.sleep(<number>this.options.retryDelay)
-        }
-      }
-
-      throw lastError;
+      await this.tryConnect(ftp);
+      return await this.tryCall(ftp, fn);
     }
     finally {
       await ftp.end();
@@ -136,13 +127,13 @@ export class FtpDeploy {
     return (glob instanceof Array) ? glob : [glob];
   }
 
-  private async getRemoteFiles(remoteFolder?: string): Promise<RemoteFile[]> {
-    let files = await this.call(ftp => ftp.list(remoteFolder));
+  private async getRemoteFiles(ftp: Ftp, remoteFolder?: string): Promise<RemoteFile[]> {
+    let files = await ftp.list(remoteFolder);
 
     const allFiles = await Promise.all(files.map(async file => {
       let descendantFiles: RemoteFile[] = [];
       if (file.remoteStat.isDirectory()) {
-        descendantFiles = await this.getRemoteFiles(file.relative);
+        descendantFiles = await this.getRemoteFiles(ftp, file.relative);
       }
       return [file, ...descendantFiles];
     }));
@@ -158,5 +149,42 @@ export class FtpDeploy {
 
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve, reject) => setTimeout(resolve, ms));
+  }
+
+  private async tryCall<T>(ftp: Ftp, fn: (ftp: Ftp) => Promise<T>): Promise<T> {
+    let lastError: Error | null = null;
+    let retries = 0;
+    while (retries <= <number>this.options.maxRetries) {
+      try {
+        return await fn(ftp);
+      }
+      catch (error) {
+        lastError = error;
+        retries++;
+        this.log('Retrying...');
+        await this.sleep(<number>this.options.retryDelay)
+      }
+    }
+
+    throw lastError;
+  }
+
+  private async tryConnect(ftp: Ftp): Promise<void> {
+    let lastError: Error | null = null;
+    let retries = 0;
+    while (retries <= <number>this.options.maxRetries) {
+      try {
+        await ftp.connect();
+        return;
+      }
+      catch (error) {
+        lastError = error;
+        retries++;
+        this.log('Retrying to connect...');
+        await this.sleep(<number>this.options.retryDelay)
+      }
+    }
+
+    throw lastError;
   }
 }
