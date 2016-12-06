@@ -8,9 +8,12 @@
 		<%- htmlWebpackPlugin.options.metadata.title %>
 	</title>
 	<base href="<%- htmlWebpackPlugin.options.metadata.baseUrl %>">
+	<script>
+		window.ENV = '<%- htmlWebpackPlugin.options.metadata.ENV %>';
+	</script>
 </head>
 
-<body aurelia-app="main" data-loglevel='<%- htmlWebpackPlugin.options.metadata.loglevel %>'>
+<body aurelia-app="main">
 	<div class="splash">
 		<div class="message">
 			<%- htmlWebpackPlugin.options.metadata.title %>

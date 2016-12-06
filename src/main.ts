@@ -4,16 +4,15 @@ import '../styles/styles.css';
 
 import 'bootstrap';
 import { Aurelia, LogManager } from 'aurelia-framework';
+import { logLevel } from 'aurelia-logging';
 import { ConsoleAppender } from 'aurelia-logging-console';
-import * as Bluebird from 'bluebird';
 
+import * as Bluebird from 'bluebird';
 Bluebird.config({ warnings: false });
 
-const loglevel = LogManager.logLevel[$('body').data('loglevel') || 'none'];
-if (loglevel) {
-  LogManager.addAppender(new ConsoleAppender());
-  LogManager.setLevel(loglevel);
-}
+const ENV = window.ENV || 'development';
+LogManager.addAppender(new ConsoleAppender());
+LogManager.setLevel(ENV === 'production' ? logLevel.warn : logLevel.debug);
 
 export async function configure(aurelia: Aurelia) {
     aurelia.use.standardConfiguration();
