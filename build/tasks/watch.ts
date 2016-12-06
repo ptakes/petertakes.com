@@ -18,7 +18,7 @@ function watchApp() {
 }
 
 gulp.task('watch', gulp.series([
-  'build:webpack:watch',
+  'build:watch',
   'serve:dotnet:watch',
   watchApp
 ]));

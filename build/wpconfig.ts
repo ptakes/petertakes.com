@@ -13,7 +13,7 @@ import * as html from '@easy-webpack/config-html';
 import * as typescript from '@easy-webpack/config-typescript';
 import * as uglify from '@easy-webpack/config-uglify';
 import { Configuration } from 'webpack';
-import { ENV, appName, baseUrl, rootDir, sourceDir, webDir } from './config';
+import { ENV, appMain, appName, baseUrl, loglevel, rootDir, sourceDir, webDir } from './config';
 
 const coreBundles = {
   bootstrap: [
@@ -48,14 +48,17 @@ const coreBundles = {
     'aurelia-templating-router',
     'aurelia-templating-resources'
   ]
-}
+};
 
 const easyConfig = generateConfig(
   {
     entry: {
-      'app': ['./app/main'],
+      'app': [appMain],
       'aurelia-bootstrap': coreBundles.bootstrap,
       'aurelia': coreBundles.aurelia.filter(pkg => coreBundles.bootstrap.indexOf(pkg) === -1)
+    },
+    metadata: {
+      loglevel
     },
     output: {
       path: webDir,

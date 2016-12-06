@@ -4,7 +4,7 @@ import { argv } from 'yargs';
 // Environments & Configurations
 export type Environment = 'development' | 'test' | 'production';
 
-export const ENV: Environment = (argv['env'] || process.env.NODE_ENV || 'development').toLowerCase();
+export const ENV: Environment = (argv.env || process.env.NODE_ENV || 'development').toLowerCase();
 process.env.NODE_ENV = ENV;
 
 export interface DotNetEnvironment {
@@ -34,23 +34,27 @@ export const dotnetEnvironments: { [environment: string]: DotNetEnvironment } = 
 // Paths
 export const rootDir = Path.resolve();
 export const sourceDir = Path.resolve('src');
-export const tasksDir = Path.resolve('build/tasks');
 export const webDir = Path.resolve('wwwroot');
 
 export const publishDir = Path.join(rootDir, 'dist/');
 
 export const cleanPaths = [
   Path.join(rootDir, 'bin/'),
-  publishDir,
   Path.join(rootDir, 'obj/'),
-  Path.join(rootDir, 'npm-debug.log')
+  Path.join(rootDir, 'npm-debug.log'),
+  webDir
 ];
 
 export const globPaths = [
   Path.join(rootDir, 'node_modules/'),
   Path.join(rootDir, 'project.lock.json'),
-  Path.join(rootDir, 'wwwroot/')
+  publishDir
 ];
+
+// App
+export const appName = 'Peter Takes';
+export const appMain = `./${Path.relative('.', Path.join(sourceDir, 'main')).replace(/\\/g, '/')}`;
+export const loglevel = ENV === 'production' ? 'warn' : 'debug';
 
 // URLs
 export const baseUrl = '/';
@@ -66,5 +70,4 @@ export const ftpRoot = 'petertakes.com/wwwroot';
 export const ftpCleanPaths = ['!logs'];
 
 // Others
-export const appName = 'Peter Takes';
 export const browserApp = ['chrome', '--incognito'];

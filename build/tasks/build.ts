@@ -23,7 +23,18 @@ gulp.task('build:webpack', () => buildWebpack(false));
 
 gulp.task('build:webpack:watch', () => buildWebpack(true));
 
-gulp.task('build', gulp.parallel([
-  'build:webpack',
-  'build:dotnet'
+gulp.task('build', gulp.series([
+  'clean',
+  gulp.parallel([
+    'build:webpack',
+    'build:dotnet'
+  ])
+]));
+
+gulp.task('build:watch', gulp.series([
+  'clean',
+  gulp.parallel([
+    'build:webpack:watch',
+    'build:dotnet'
+  ])
 ]));

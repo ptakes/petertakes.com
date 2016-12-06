@@ -10,7 +10,7 @@
 	<base href="<%- htmlWebpackPlugin.options.metadata.baseUrl %>">
 </head>
 
-<body aurelia-app="main">
+<body aurelia-app="main" data-loglevel='<%- htmlWebpackPlugin.options.metadata.loglevel %>'>
 	<div class="splash">
 		<div class="message">
 			<%- htmlWebpackPlugin.options.metadata.title %>
