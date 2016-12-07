@@ -1,7 +1,7 @@
 import * as gulp from 'gulp';
 import * as webpack from 'webpack';
 import { build as buildDotNet } from '../plugins/dotnet';
-import { config as webpackConfig } from '../wpconfig';
+import { config as webpackConfig } from '../webpack.config';
 
 function buildWebpack(watch: boolean): Promise<void> {
   const config = Object.assign(webpackConfig, { watch });

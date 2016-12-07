@@ -4,6 +4,7 @@
   "editor.insertSpaces": true,
   "files.autoSave": "afterDelay",
   "files.exclude": {
+    "**/.awcache": true,
     "**/.git": true,
     "**/bin": true,
     "**/dist": true,

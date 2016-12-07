@@ -33,8 +33,8 @@ namespace Pta
             defaultFilesOptions.DefaultFileNames.Clear();
             defaultFilesOptions.DefaultFileNames.Add("index.html");
 
-            app.UseDefaultFiles(defaultFilesOptions)
-              .UseStaticFiles();
+            app.UseDefaultFiles(defaultFilesOptions);
+            app.UseStaticFiles();
         }
     }
 }

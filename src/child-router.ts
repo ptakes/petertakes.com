@@ -1,13 +1,14 @@
 import { ConfiguresRouter, Router, RouterConfiguration } from 'aurelia-router';
 
-export class App implements ConfiguresRouter {
+export class ChildRouter implements ConfiguresRouter {
   router: Router;
 
-  configureRouter(config: RouterConfiguration, router: Router): void {
-    config.title = $('head title').text();
+  heading = 'Child Router';
+
+  configureRouter(config: RouterConfiguration, router: Router) {
     config.map([
       { route: ['', 'welcome'], name: 'welcome', moduleId: './welcome', nav: true, title: 'Welcome' },
-      { route: ['users', 'users/:username'], name: 'users', moduleId: './users', nav: true, title: 'Github Users',  },
+      { route: ['users', 'users/:username'], name: 'users', moduleId: './users', nav: true, title: 'Github Users', },
       { route: 'child-router', name: 'child-router', moduleId: './child-router', nav: true, title: 'Child Router' }
     ]);
 

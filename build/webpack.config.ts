@@ -16,7 +16,7 @@ import * as uglify from '@easy-webpack/config-uglify';
 import * as cssnano from 'cssnano';
 import * as cssnext from 'postcss-cssnext';
 import { Configuration } from 'webpack';
-import { ENV, appMain, appName, baseUrl, rootDir, sourceDir, webDir } from './config';
+import { ENV, appMain, appName, baseUrl, rootDir, sourceDir, webDir } from './project.config';
 
 const coreBundles = {
   bootstrap: [
@@ -63,6 +63,15 @@ if (ENV === 'production') {
   ];
 }
 
+const typescriptOptions = {
+  useCache: true,
+  useBabel: true,
+  babelOptions: {
+    presets: ['latest'],
+    plugins: ['transform-class-properties', 'transform-regenerator']
+  }
+};
+
 const easyConfig = generateConfig(
   {
     entry: {
@@ -79,7 +88,7 @@ const easyConfig = generateConfig(
   },
   ENV === 'production' ? envProduction({ loaderOptions: envLoaderOptions }) : envDevelopment(),
   aurelia({ root: rootDir, src: sourceDir, title: appName, baseUrl: baseUrl }),
-  typescript(),
+  typescript({ options: typescriptOptions }),
   html(),
   css({ filename: 'styles.css', allChunks: true, sourceMap: false, additionalLoaders: additionalCssLoaders }),
   fontAndImages(),

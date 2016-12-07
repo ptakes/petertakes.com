@@ -1,6 +1,6 @@
 import * as PubSub from 'pubsub-js';
 import * as path from 'path';
-import { DotNetEnvironment, Environment, dotnetEnvironments, publishDir, serverUrl } from '../config';
+import { DotNetEnvironment, Environment, dotnetEnvironments, publishDir, serverUrl } from '../project.config';
 import { ChildProcess, SpawnOptions, spawn } from 'child_process';
 
 const defaultBuildEnvironment: Environment = 'development';

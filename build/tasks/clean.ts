@@ -1,4 +1,4 @@
-import { cleanPaths, globPaths, publishDir } from '../config';
+import { cleanPaths, globPaths, publishDir } from '../project.config';
 import * as del from 'del';
 import * as gulp from 'gulp';
 
