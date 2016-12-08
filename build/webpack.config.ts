@@ -16,7 +16,7 @@ import * as uglify from '@easy-webpack/config-uglify';
 import * as cssnano from 'cssnano';
 import * as cssnext from 'postcss-cssnext';
 import { Configuration } from 'webpack';
-import { ENV, appMain, appName, baseUrl, rootDir, sourceDir, webDir } from './project.config';
+import { ENV, appDir, appMain, appName, appSourceDir, baseUrl, webRootDir } from './project.config';
 
 const coreBundles = {
   bootstrap: [
@@ -83,11 +83,11 @@ const easyConfig = generateConfig(
       ENV
     },
     output: {
-      path: webDir,
+      path: webRootDir,
     }
   },
   ENV === 'production' ? envProduction({ loaderOptions: envLoaderOptions }) : envDevelopment(),
-  aurelia({ root: rootDir, src: sourceDir, title: appName, baseUrl: baseUrl }),
+  aurelia({ root: appDir, src: appSourceDir, title: appName, baseUrl: baseUrl }),
   typescript({ options: typescriptOptions }),
   html(),
   css({ filename: 'styles.css', allChunks: true, sourceMap: false, additionalLoaders: additionalCssLoaders }),

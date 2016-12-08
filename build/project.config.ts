@@ -32,9 +32,10 @@ export const dotnetEnvironments: { [environment: string]: DotNetEnvironment } = 
 };
 
 // Paths
+export const appDir = Path.resolve('app');
+export const appSourceDir = Path.resolve('app/src');
 export const rootDir = Path.resolve();
-export const sourceDir = Path.resolve('App/src');
-export const webDir = Path.resolve('wwwroot');
+export const webRootDir = Path.resolve('wwwroot');
 
 export const publishDir = Path.join(rootDir, 'dist/');
 
@@ -42,7 +43,7 @@ export const cleanPaths = [
   Path.join(rootDir, 'bin/'),
   Path.join(rootDir, 'obj/'),
   Path.join(rootDir, 'npm-debug.log'),
-  webDir
+  webRootDir
 ];
 
 export const globPaths = [
@@ -53,7 +54,7 @@ export const globPaths = [
 
 // App
 export const appName = 'Peter Takes';
-export const appMain = `./${Path.relative('.', Path.join(sourceDir, 'main')).replace(/\\/g, '/')}`;
+export const appMain = `./${Path.relative('appDir', Path.join(appSourceDir, 'main')).replace(/\\/g, '/')}`;
 export const loglevel = ENV === 'production' ? 'warn' : 'debug';
 
 // URLs

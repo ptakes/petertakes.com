@@ -1,7 +1,7 @@
 import * as Path from 'path';
 import * as PubSub from 'pubsub-js';
 import * as gulp from 'gulp';
-import { webDir } from '../project.config';
+import { webRootDir } from '../project.config';
 import { logger } from '../plugins/logger';
 import { reloadBrowser } from '../plugins/browser-link';
 
@@ -13,7 +13,7 @@ function reportChange(file: string): void {
 }
 
 function watchApp() {
-  gulp.watch(Path.join(webDir, '**/*'), reloadBrowser).on('change', reportChange);
+  gulp.watch(Path.join(webRootDir, '**/*'), reloadBrowser).on('change', reportChange);
   started = true;
 }
 
