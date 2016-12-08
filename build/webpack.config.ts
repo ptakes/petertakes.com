@@ -16,7 +16,7 @@ import * as uglify from '@easy-webpack/config-uglify';
 import * as cssnano from 'cssnano';
 import * as cssnext from 'postcss-cssnext';
 import { Configuration } from 'webpack';
-import { ENV, appDir, appMain, appName, appSourceDir, baseUrl, webRootDir } from './project.config';
+import { ENV, appDir, appMain, appName, baseUrl, makeAppRootRelative, rootDir, webRootDir } from './project.config';
 
 const coreBundles = {
   bootstrap: [
@@ -87,7 +87,7 @@ const easyConfig = generateConfig(
     }
   },
   ENV === 'production' ? envProduction({ loaderOptions: envLoaderOptions }) : envDevelopment(),
-  aurelia({ root: appDir, src: appSourceDir, title: appName, baseUrl: baseUrl }),
+  aurelia({ root: rootDir, src: appDir, title: appName, baseUrl: baseUrl }),
   typescript({ options: typescriptOptions }),
   html(),
   css({ filename: 'styles.css', allChunks: true, sourceMap: false, additionalLoaders: additionalCssLoaders }),
@@ -95,10 +95,11 @@ const easyConfig = generateConfig(
   globalBluebird(),
   globalJquery(),
   globalRegenerator(),
-  generateIndexHtml({ minify: ENV === 'production' }),
+  generateIndexHtml({ minify: ENV === 'production', overrideOptions: { template: `!!ejs-compiled-loader!${makeAppRootRelative('index.html')}` } }),
   commonChunksOptimize({ appChunkName: 'app', firstChunk: 'aurelia-bootstrap' }),
-  copyFiles({ patterns: [{ from: 'favicon.ico', to: 'favicon.ico' }] }),
+  copyFiles({ patterns: [{ from: makeAppRootRelative('favicon.ico'), to: 'favicon.ico' }] }),
   ENV === 'production' ? uglify({ debug: false, mangle: { except: ['cb', '__webpack_require__'] } }) : {}
 );
 
 export const config = <Configuration>stripMetadata(easyConfig);
+

@@ -32,12 +32,14 @@ export const dotnetEnvironments: { [environment: string]: DotNetEnvironment } = 
 };
 
 // Paths
-export const appDir = Path.resolve('app');
-export const appSourceDir = Path.resolve('app/src');
+export const appRootDir = Path.resolve('app');
+export const appDir = Path.resolve('app/src');
 export const rootDir = Path.resolve();
 export const webRootDir = Path.resolve('wwwroot');
 
 export const publishDir = Path.join(rootDir, 'dist/');
+
+export const makeAppRootRelative = (path: string) => `./${Path.relative(rootDir, Path.join(appRootDir, path)).replace(/\\/g, '/')}`;
 
 export const cleanPaths = [
   Path.join(rootDir, 'bin/'),
@@ -54,7 +56,7 @@ export const globPaths = [
 
 // App
 export const appName = 'Peter Takes';
-export const appMain = `./${Path.relative('appDir', Path.join(appSourceDir, 'main')).replace(/\\/g, '/')}`;
+export const appMain = `./${Path.relative(rootDir, Path.join(appDir, 'main')).replace(/\\/g, '/')}`;
 export const loglevel = ENV === 'production' ? 'warn' : 'debug';
 
 // URLs
