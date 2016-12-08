@@ -12,10 +12,11 @@
     "preinstall": "dotnet restore",
     "publish": "cross-env NODE_ENV=production TS_NODE_PROJECT=./build/typescript.config.json TS_NODE_FAST=true gulp publish",
     "serve": "cross-env NODE_ENV=development TS_NODE_PROJECT=./build/typescript.config.json TS_NODE_FAST=true gulp serve",
+    "serve:prod": "cross-env NODE_ENV=prodution TS_NODE_PROJECT=./build/typescript.config.json TS_NODE_FAST=true gulp serve",
     "start": "cross-env NODE_ENV=development TS_NODE_PROJECT=./build/typescript.config.json TS_NODE_FAST=true gulp serve",
     "test": "cross-env NODE_ENV=test TS_NODE_PROJECT=./build/typescript.config.json TS_NODE_FAST=true gulp test",
     "watch": "cross-env NODE_ENV=development TS_NODE_PROJECT=./build/typescript.config.json TS_NODE_FAST=true gulp watch",
-    "watch:test": "cross-env NODE_ENV=test TS_NODE_PROJECT=./build/typescript.config.json TS_NODE_FAST=true gulp watch"
+    "watch:prod": "cross-env NODE_ENV=production TS_NODE_PROJECT=./build/typescript.config.json TS_NODE_FAST=true gulp watch"
   },
   "dependencies": {
     "aurelia-bootstrapper-webpack": "^1.0.0",

@@ -59,7 +59,7 @@ if (ENV === 'production') {
   additionalCssLoaders.push('postcss-loader');
   envLoaderOptions.postcss = [
     cssnext(),
-    cssnano({ autoprefixer: false })
+    cssnano({ autoprefixer: false, safe: true })
   ];
 }
 
