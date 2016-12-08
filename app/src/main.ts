@@ -1,3 +1,4 @@
+// https://github.com/aurelia/framework/blob/master/doc/article/drafts/Aurelia%20Project%20Structure.md.md
 import 'font-awesome/css/font-awesome.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import '../styles/styles.css';
@@ -15,8 +16,10 @@ LogManager.addAppender(new ConsoleAppender());
 LogManager.setLevel(ENV === 'production' ? logLevel.warn : logLevel.debug);
 
 export async function configure(aurelia: Aurelia): Promise<void> {
-    aurelia.use.standardConfiguration();
+    aurelia.use
+        .standardConfiguration()
+        .feature('resources');
 
     await aurelia.start();
-    aurelia.setRoot('app');
+    aurelia.setRoot('shell/shell');
 }

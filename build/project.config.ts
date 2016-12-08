@@ -33,7 +33,7 @@ export const dotnetEnvironments: { [environment: string]: DotNetEnvironment } = 
 
 // Paths
 export const rootDir = Path.resolve();
-export const sourceDir = Path.resolve('src');
+export const sourceDir = Path.resolve('App/src');
 export const webDir = Path.resolve('wwwroot');
 
 export const publishDir = Path.join(rootDir, 'dist/');

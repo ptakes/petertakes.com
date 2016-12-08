@@ -1,17 +1,23 @@
 {
+  "userSecretsId": "petertakes.com-83e156a1-112d-4905-a19d-6a1d7f72c9d9",
   "dependencies": {
+    "Microsoft.AspNetCore.ResponseCompression": "1.0.0",
     "Microsoft.AspNetCore.Diagnostics": "1.1.0",
+    "Microsoft.AspNetCore.Mvc": "1.1.0",
     "Microsoft.AspNetCore.Server.IISIntegration": "1.1.0",
     "Microsoft.AspNetCore.Server.Kestrel": "1.1.0",
     "Microsoft.AspNetCore.StaticFiles": "1.1.0",
     "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.1.0",
     "Microsoft.Extensions.Configuration.FileExtensions": "1.1.0",
     "Microsoft.Extensions.Configuration.Json": "1.1.0",
-    "Microsoft.Extensions.Logging.Console": "1.1.0"
+    "Microsoft.Extensions.Configuration.UserSecrets": "1.1.0",
+    "Microsoft.Extensions.Logging.Console": "1.1.0",
+    "Microsoft.Extensions.Options.ConfigurationExtensions": "1.1.0"
   },
   "tools": {
     "Microsoft.AspNetCore.Server.IISIntegration.Tools": "1.1.0-*",
-    "Microsoft.DotNet.Watcher.Tools": "1.1.0-*"
+    "Microsoft.DotNet.Watcher.Tools": "1.1.0-*",
+    "Microsoft.Extensions.SecretManager.Tools": "1.1.0-*"
   },
   "frameworks": {
     "net452": {},

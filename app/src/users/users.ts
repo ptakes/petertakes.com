@@ -4,13 +4,13 @@ import { RoutableComponentActivate } from 'aurelia-router';
 import 'isomorphic-fetch';
 
 interface IUser {
-  avatar_url: string;
+  avatarUrl: string;
+  contactUrl: string;
   login: string;
-  html_url: string;
 }
 
 export class Users implements RoutableComponentActivate {
-  heading: string = 'Github Users';
+  heading: string = 'Users';
   users: Array<IUser> = [];
   http: HttpClient;
 
@@ -23,7 +23,7 @@ export class Users implements RoutableComponentActivate {
     http.configure(config => {
       config
         .useStandardConfiguration()
-        .withBaseUrl('https://api.github.com/');
+        .withBaseUrl('/api/');
     });
 
     const response = await http.fetch(`users${params.username ? `/${params.username}` : ''}`);
