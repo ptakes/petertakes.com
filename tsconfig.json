@@ -26,9 +26,13 @@
     "forkChecker": true,
     "forkCheckerSilent": true,
     "useBabel": true,
-    "useCache": true
+    "useCache": true,
+    "usePrecompiledFiles": true
   },
-  "include": [
-    "app"
+  "exclude": [
+    "api",
+    "build",
+    "node_modules",
+    "wwwroot"
   ]
 }

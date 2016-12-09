@@ -10,7 +10,9 @@
     "**/dist": true,
     "**/node_modules": true,
     "**/obj": true,
+    "**/project.lock.json": true,
     "**/typings": true,
+    "**/wwwroot": true,
     "**/*.js": {
       "when": "$(basename).ts"
     },

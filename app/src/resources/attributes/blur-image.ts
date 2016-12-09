@@ -13,7 +13,7 @@ export class BlurImageCustomAttribute {
   }
 }
 
-/* eslint-disable */
+/* tslint:disable */
 
 /*
 This Snippet is using a modified Stack Blur js lib for blurring the header images.
@@ -99,7 +99,7 @@ var shg_table = [
 
 var BLUR_RADIUS = 40;
 
-function stackBlurCanvasRGBA(canvas, top_x, top_y, width, height, radius) {
+function stackBlurCanvasRGBA(canvas: any, top_x: number, top_y: number, width: number, height: number, radius: number): void {
   if (isNaN(radius) || radius < 1) return;
   radius |= 0;
 
@@ -344,7 +344,7 @@ class BlurStack {
   next: BlurStack | null = null;
 }
 
-function drawBlur(canvas, image) {
+function drawBlur(canvas: any, image: any): void {
   var w = canvas.width;
   var h = canvas.height;
   var canvasContext = canvas.getContext('2d');
