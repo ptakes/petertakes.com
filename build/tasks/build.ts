@@ -1,12 +1,12 @@
 import * as gulp from 'gulp';
 import * as webpack from 'webpack';
 import { build as buildDotNet } from '../plugins/dotnet';
-import { config as webpackConfig } from '../webpack.config';
+import { config as webpackConfig } from '../wpconfig';
 
 function buildWebpack(watch: boolean): Promise<void> {
   const config = Object.assign(webpackConfig, { watch });
 
-  return new Promise((resolve, reject) =>
+  return new Promise<void>((resolve, reject) =>
     webpack(config, (error: Error, stats: webpack.compiler.Stats) => {
       if (error) {
         reject(error);

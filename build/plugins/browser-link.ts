@@ -1,6 +1,6 @@
 import { BrowserSyncInstance as BrowserSync, Options as BrowserSyncOptions, create as createBrowserSync } from 'browser-sync';
 import * as open from 'opn';
-import { browserApp, proxyPort, proxyUIPort, serverUrl } from '../project.config';
+import { browserApp, proxyPort, proxyUIPort, serverUrl } from '../config';
 import { logger } from './logger';
 
 declare module 'browser-sync' {

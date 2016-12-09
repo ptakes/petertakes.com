@@ -156,7 +156,7 @@ export class Ftp {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise((resolve, reject) => setTimeout(resolve, ms));
+    return new Promise<void>((resolve, reject) => setTimeout(resolve, ms));
   }
 
   private async tryCall<T>(fn: (ftp: Ftp) => Promise<T>): Promise<T> {

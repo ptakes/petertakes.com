@@ -13,7 +13,22 @@
       "dom"
     ]
   },
-  "ïnclude": [
-    "src"
+  "awesomeTypescriptLoaderOptions": {
+    "babelOptions": {
+      "presets": [
+        "latest"
+      ],
+      "plugins": [
+        "transform-class-properties",
+        "transform-regenerator"
+      ]
+    },
+    "forkChecker": true,
+    "forkCheckerSilent": true,
+    "useBabel": true,
+    "useCache": true
+  },
+  "include": [
+    "app"
   ]
 }

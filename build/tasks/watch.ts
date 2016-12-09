@@ -1,7 +1,7 @@
 import * as Path from 'path';
 import * as PubSub from 'pubsub-js';
 import * as gulp from 'gulp';
-import { webRootDir } from '../project.config';
+import { webRootDir } from '../config';
 import { logger } from '../plugins/logger';
 import { reloadBrowser } from '../plugins/browser-link';
 

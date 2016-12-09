@@ -10,8 +10,5 @@
       "es2017",
       "dom"
     ]
-  },
-  "awesomeTypescriptLoaderOptions": {
-    "forkChecker": true
   }
 }

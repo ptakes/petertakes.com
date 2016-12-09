@@ -49,8 +49,10 @@ export const cleanPaths = [
 ];
 
 export const globPaths = [
+  Path.join(rootDir, '.awcache/'),
   Path.join(rootDir, 'node_modules/'),
   Path.join(rootDir, 'project.lock.json'),
+  Path.join(rootDir, 'typings/'),
   publishDir
 ];
 
