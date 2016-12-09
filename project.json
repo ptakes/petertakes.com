@@ -1,6 +1,7 @@
 {
   "userSecretsId": "petertakes.com-83e156a1-112d-4905-a19d-6a1d7f72c9d9",
   "dependencies": {
+    "Autofac.Extensions.DependencyInjection": "4.0.0",
     "Microsoft.AspNetCore.ResponseCompression": "1.0.0",
     "Microsoft.AspNetCore.Diagnostics": "1.1.0",
     "Microsoft.AspNetCore.Mvc": "1.1.0",

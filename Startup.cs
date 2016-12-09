@@ -1,4 +1,8 @@
+using System;
+using System.Reflection;
 using System.Text;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -17,9 +21,9 @@ namespace Pta
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
-           .SetBasePath(env.ContentRootPath)
-           .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-           .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
 
             if (env.IsDevelopment())
             {
@@ -29,12 +33,19 @@ namespace Pta
             builder.AddEnvironmentVariables();
 
             Configuration = builder.Build();
+
+            Current = this;
         }
+
+        public static Startup Current { get; private set; }
 
         public IConfigurationRoot Configuration { get; }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public IContainer Container { get; private set; }
+
+        public void Configure(IApplicationBuilder app, IApplicationLifetime appLifetime, ILoggerFactory loggerFactory)
         {
+            appLifetime.ApplicationStopped.Register(() => Container.Dispose());
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
 
             app.UseResponseCompression();
@@ -70,19 +81,23 @@ namespace Pta
             app.UseMvc();
         }
 
-        public void ConfigureServices(IServiceCollection services)
+        public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddLogging();
-            services.AddOptions();
 
+            services.AddOptions();
             services.Configure<GithubCredentials>(Configuration.GetSection("Github"));
-            services.AddScoped<IUsersService, GithubUsersService>();
+
+            services.AddResponseCompression();
 
             var mvc = services.AddMvcCore();
             mvc.AddJsonFormatters(options => options.ContractResolver = new CamelCasePropertyNamesContractResolver());
 
-            services.AddResponseCompression();
-
+            var builder = new ContainerBuilder();
+            builder.Populate(services);
+            builder.RegisterAssemblyModules(typeof(Startup).GetTypeInfo().Assembly);
+            Container = builder.Build();
+            return new AutofacServiceProvider(Container);
         }
     }
 }
